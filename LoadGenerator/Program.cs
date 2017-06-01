@@ -11,14 +11,15 @@ namespace LoadGenerator
     {
         static void Main(string[] args)
         { 
-            if (args.Length!=3) {
+            if (args.Length!=4) {
                 Console.WriteLine("Usage:");
-                Console.WriteLine("  LoadGenerator <type> <usercount> <duration>");
+                Console.WriteLine("  LoadGenerator <type> <usercount> <duration> <url>");
                 return;
             }
             var type = int.Parse(args[0]);
             var userCount = int.Parse(args[1]);
             var duration = int.Parse(args[2]);
+            var url = args[3];
             switch (type) {
                 case 1:
                     Console.Error.WriteLine("========================== EVALUATION 1 =============================");
@@ -36,7 +37,7 @@ namespace LoadGenerator
                     Console.Error.WriteLine("========================== EVALUATION 3 =============================");
                     Console.WriteLine($"Concurrent Users: {userCount}");
                     Console.WriteLine($"Duration: {duration} seconds");
-                    RunLoad3(userCount,duration);
+                    RunLoad3(userCount,duration,url);
                     break;
                 default:
                     Console.Error.WriteLine("Evaluation number must be 1-3");
@@ -64,10 +65,10 @@ namespace LoadGenerator
 
 
         /* EVALUATION 3 */
-        static void RunLoad3(int userCount=1,int duration =1) {
+        static void RunLoad3(int userCount=1,int duration =1,string url="http://saasi-vm01.it.deakin.edu.au") {
             List<Thread> users = new List<Thread>();
             for (int i =1; i<=userCount;++i) {
-                var t = new Thread(() => RunUser3(duration));
+                var t = new Thread(() => RunUser3(duration,url));
                 t.Start();
                 Console.Error.WriteLine($"Started Thread #{i}");
                 users.Add(t);
@@ -75,10 +76,10 @@ namespace LoadGenerator
                                     // avoid all threads generating requests at the same interval;
             }
         }
-        static void RunUser3(int duration = 1){
+        static void RunUser3(int duration = 1, string url="http://saasi-vm01.it.deakin.edu.au") {
             Console.WriteLine("RUN!");
             IApplicationUser user = new Application3User();
-            var t =Task.Run(async()=> {await user.Run("http://web", duration);});
+            var t =Task.Run(async()=> {await user.Run(url, duration);});
             t.Wait();
         }
 
